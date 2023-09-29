@@ -9,6 +9,8 @@ from fluent.runtime import FluentLocalization
 from bot.blocklists import banned, shadowbanned
 from bot.config_reader import config
 from bot.filters import SupportedMediaFilter
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram import types
 
 router = Router()
 
@@ -34,6 +36,7 @@ async def cmd_start(message: Message, l10n: FluentLocalization):
     :param message: сообщение от пользователя с командой /start
     :param l10n: объект локализации
     """
+
     await message.answer(l10n.format_value("intro"))
 
 
@@ -45,7 +48,32 @@ async def cmd_help(message: Message, l10n: FluentLocalization):
     :param message: сообщение от пользователя с командой /help
     :param l10n: объект локализации
     """
-    await message.answer(l10n.format_value("help"))
+    builder = InlineKeyboardBuilder()
+    builder.row(types.InlineKeyboardButton(
+        text="Зарегистрироваться на учебном портале",
+        callback_data="register")
+    )
+    builder.row(types.InlineKeyboardButton(
+        text="Задать вопрос об обучении",
+        callback_data="question")
+    )
+    await message.answer(l10n.format_value("help"),reply_markup=builder.as_markup())
+
+@router.callback_query(F.data == "register")
+async def send_random_value(callback: types.CallbackQuery):
+    await callback.message.answer(f"""
+    Для регистрации на учебном портале нам необходимы следующие данные:
+    •  ФИО
+    •  Email (если отличается от введенного ранее)
+    •  Компания или ВУЗ
+    •  Ваша роль (партнер/заказчик/студент/преподаватель/сотрудник PT/другое)
+    Укажите их в любом формате одним сообщением
+    """)
+
+@router.callback_query(F.data == "question")
+async def send_random_value(callback: types.CallbackQuery):
+    url = 'https://info.edu.ptsecurity.com/faq'
+    await callback.message.answer(url)
 
 
 @router.message(F.text)
@@ -65,8 +93,12 @@ async def text_message(message: Message, bot: Bot, l10n: FluentLocalization):
         return
     else:
         await bot.send_message(
-            config.admin_chat_id,
-            message.html_text + f"\n\n#id{message.from_user.id}", parse_mode="HTML"
+            chat_id= config.admin_chat_id,
+            text = message.html_text + f"\n\n#id{message.from_user.id}", parse_mode="HTML"
+        )
+        await bot.send_message(
+            chat_id=config.admin_channel_id,
+            text=message.html_text + f"\n\n#id{message.from_user.id}", parse_mode="HTML"
         )
         create_task(_send_expiring_notification(message, l10n))
 

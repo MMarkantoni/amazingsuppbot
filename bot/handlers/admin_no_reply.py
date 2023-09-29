@@ -19,3 +19,4 @@ async def has_no_reply(message: Message, l10n: FluentLocalization):
     """
     if message.content_type not in (ContentType.NEW_CHAT_MEMBERS, ContentType.LEFT_CHAT_MEMBER):
         await message.reply(l10n.format_value("no-reply-error"))
+

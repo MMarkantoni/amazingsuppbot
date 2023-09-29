@@ -6,6 +6,7 @@ from pydantic import BaseSettings, SecretStr
 class Settings(BaseSettings):
     bot_token: SecretStr
     admin_chat_id: int
+    admin_channel_id: int
     remove_sent_confirmation: bool
     webhook_domain: Optional[str]
     webhook_path: Optional[str]

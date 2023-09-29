@@ -72,4 +72,6 @@ async def main():
         await bot.session.close()
 
 
+
+
 asyncio.run(main())

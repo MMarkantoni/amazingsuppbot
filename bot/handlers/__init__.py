@@ -13,3 +13,4 @@ def setup_routers() -> Router:
     router.include_router(usermode.router)
 
     return router
+
